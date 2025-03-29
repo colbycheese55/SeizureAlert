@@ -18,6 +18,8 @@ mp_draw = mp.solutions.drawing_utils
 # Initialize Webcam
 cap = cv2.VideoCapture(0)  # 0 for default webcam
 
+open("../data/landmarks_data.csv", "w").close()
+
 csv_file = open("../data/landmarks_data.csv", "w", newline="")
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(["timestamp", "type", "index", "x", "y", "z"])  # Header
