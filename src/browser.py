@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 
 class SimpleBrowser(QMainWindow):
     def __init__(self):
@@ -10,6 +10,8 @@ class SimpleBrowser(QMainWindow):
         self.setWindowTitle("Lockdown Browser")
         screen_size = QApplication.primaryScreen().size()
         self.setGeometry(0, 0, screen_size.width(), screen_size.height())
+
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         # Create WebView and load Flask app
         self.browser = QWebEngineView()
