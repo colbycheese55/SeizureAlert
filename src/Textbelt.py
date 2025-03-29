@@ -24,4 +24,4 @@ def send_text_message(phone_number: str, message: str) -> dict:
     response = requests.post(url, data=payload)
     return response.json()
 
-send_text_message(2405491302, "Hello from another file!")
+
