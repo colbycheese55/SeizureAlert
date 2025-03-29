@@ -8,7 +8,8 @@ class SimpleBrowser(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Lockdown Browser")
-        self.setGeometry(100, 100, 1024, 768)  # Window size
+        screen_size = QApplication.primaryScreen().size()
+        self.setGeometry(0, 0, screen_size.width(), screen_size.height())
 
         # Create WebView and load Flask app
         self.browser = QWebEngineView()

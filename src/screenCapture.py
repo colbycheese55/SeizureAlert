@@ -2,6 +2,7 @@ import mss
 import numpy as np
 import cv2
 from collections import deque
+import ui
 
 
 DOWNSCALE_WIDTH = 160
@@ -60,3 +61,4 @@ def run():
 
         if rolling_var > SEIZURE_VAR_THRESHOLD:
             print("seizure")
+            ui.seizure.set()
