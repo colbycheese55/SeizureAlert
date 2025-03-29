@@ -6,9 +6,11 @@ from collections import deque
 
 DOWNSCALE_WIDTH = 160
 DOWNSCALE_HEIGHT = 90
-ROLLING_AVG_WINDOWS = 20
 
-def compute_fft_energy(frame):
+ROLLING_AVG_WINDOW = 50
+SEIZURE_VAR_THRESHOLD = 3000
+
+def compute_fft_energy(frame: cv2.typing.MatLike) -> float:
     """
     Compute the energy of high frequencies in a frame using FFT.
     """
@@ -32,8 +34,7 @@ def compute_fft_energy(frame):
     return high_freq_energy
 
 
-
-def capture_screen():
+def capture_screen_frame() -> cv2.typing.MatLike:
     """
     Captures the entire screen and returns it as a numpy array.
     """
@@ -46,28 +47,21 @@ def capture_screen():
         frame_resized = cv2.resize(frame, (DOWNSCALE_WIDTH, DOWNSCALE_HEIGHT))
         
         return frame_resized
-    
 
-prev_energy = 0
-rolling = deque(maxlen=ROLLING_AVG_WINDOWS)  # Initialize a deque for rolling average
 
-# Example usage: Capture and display frames
-while True:
-    start_time = cv2.getTickCount()  # Start time for performance measurement
-    frame = capture_screen()
+def run():
+    rolling_queue = deque(maxlen=ROLLING_AVG_WINDOW)  # Initialize a deque for rolling average
 
-    
-    # cv2.imshow("Screen Capture", frame)  # Show the captured frame
-    current_energy = compute_fft_energy(frame)  # Compute FFT energy
-    rolling.append(current_energy)  # Append current energy to the deque
-    rolling_var = np.var(rolling) / 1e10  # Calculate rolling variance
-    print(f"Rolling Variance: {rolling_var}")  # Print the rolling variance
-    # print(f"Rolling Average Energy: {rolling_avg}")  # Print the rolling average
-    change = abs(current_energy - prev_energy) / 1e6
-    # print(f"High Frequency Energy: {change}")  # Print the energy value
-    end_time = cv2.getTickCount()  # End time for performance measurement
-    time_taken = (end_time - start_time) / cv2.getTickFrequency()  # Calculate time taken
-    # print(f"Time taken for FFT: {time_taken:.4f} seconds")  # Print time taken
+    while True:
+        frame = capture_screen_frame()
+        frame_energy = compute_fft_energy(frame)  # Compute FFT energy
+        rolling_queue.append(frame_energy)  # Append current energy to the deque
+        rolling_var = np.var(rolling_queue) / 1e10  # Calculate rolling variance and scale it
+
+        if rolling_var > SEIZURE_VAR_THRESHOLD:
+            print("seizure")
+
+run()
 
 
 
