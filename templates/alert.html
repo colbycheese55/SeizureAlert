@@ -10,15 +10,32 @@
     <div class="container text-center">
         <div class="alert alert-warning p-5 shadow-lg" role="alert">
             <h1 class="display-3 fw-bold">⚠ ALERT ⚠</h1>
-            <p class="fs-4">Seizure stimulus detected! Do you need help?</p>
+            <p class="fs-4"> {{ text }}</p>
         </div>
         <div class="mt-3 d-grid gap-2">
-            <a href="#" class="btn btn-light btn-lg me-2">YES</a>
+            <a href="help" class="btn btn-light btn-lg me-2">YES</a>
             <a href="#" class="btn btn-dark btn-lg">NO</a>
         </div>
         <div class="mt-3">
             <input id="counter-box" type="text" class="form-control text-center w-25 mx-auto" value="0" readonly>
         </div>
     </div>
+
+    <script>
+        // Get the counter value from the input field
+        let counter = {{ counter }};
+        const counterBox = document.getElementById('counter-box');
+
+        // Function to decrement the counter every second
+        setInterval(function() {
+            if (counter > 0) {
+                counter--;
+                counterBox.value = counter; // Update the counter textbox
+            }
+            else {
+                window.location.replace("help"); // Redirect to help page when counter reaches 0
+            }
+        }, 1000); // Decrement every 1000 milliseconds (1 second)
+    </script>
 </body>
 </html>
