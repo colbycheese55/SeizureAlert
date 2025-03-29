@@ -61,4 +61,5 @@ def run():
 
         if rolling_var > SEIZURE_VAR_THRESHOLD:
             print("seizure")
+            ui.alert_text = 'Seizure stimulus detected! Do you need help?'
             ui.seizure.set()

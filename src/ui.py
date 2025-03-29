@@ -6,12 +6,13 @@ templates_path = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app = Flask(__name__, template_folder=templates_path)
 
 seizure = threading.Event()
+alert_text = None
 
 
 @app.route('/alert')
 def home():
     vars = {
-        'text': 'Seizure stimulus detected! Do you need help?',
+        'text': alert_text,
         'counter': 10,
     }
 
