@@ -1,9 +1,8 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template
 import os
 
 templates_path = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app = Flask(__name__, template_folder=templates_path)
-print(app.template_folder)
 
 
 @app.route('/alert')
@@ -31,5 +30,5 @@ def alert_no():
 
 
 
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8000, debug=True)
+# if __name__ == '__main__':
+#     app.run(host='127.0.0.1', port=8000, debug=True)

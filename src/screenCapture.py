@@ -60,8 +60,3 @@ def run():
 
         if rolling_var > SEIZURE_VAR_THRESHOLD:
             print("seizure")
-
-run()
-
-
-
