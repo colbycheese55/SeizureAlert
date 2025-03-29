@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
-open("movement_analysis.csv", "w").close()
-open("seizure_detection_processed.csv", "w").close()
+open("../data/movement_analysis.csv", "w").close()
+open("../data/seizure_detection_processed.csv", "w").close()
 
 df = pd.read_csv("../data/landmarks_data.csv")
 df = df.sort_values(by=["timestamp"])
@@ -25,9 +25,9 @@ for landmark_type in ["hand", "face", "pose"]:
         prev_frame = row
 
 movement_df = pd.DataFrame(movement_data, columns=["timestamp", "type", "index", "movement"])
-movement_df.to_csv("movement_analysis.csv", index=False)
+movement_df.to_csv("../data/movement_analysis.csv", index=False)
 
-df = pd.read_csv("movement_analysis.csv")
+df = pd.read_csv("../data/movement_analysis.csv")
 df["timestamp"] -= df["timestamp"].min()
 
 window_size = 100
@@ -44,7 +44,7 @@ for body_part in df["type"].unique():
     detection_results.append(subset)
 
 final_df = pd.concat(detection_results)
-final_df.to_csv("seizure_detection_processed.csv", index=False)
+final_df.to_csv("../data/seizure_detection_processed.csv", index=False)
 
 alert_window_size = 10
 final_df["rolling_alerts"] = final_df["seizure_alert"].rolling(window=alert_window_size, min_periods=1).sum()
