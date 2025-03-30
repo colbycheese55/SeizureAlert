@@ -27,9 +27,9 @@ def home():
 def help_needed():
     print('help_needed')
 
-    if config_instance.get_config_value('enable_sms'):
+    if config_instance.get_config_value('enable sms'):
         phone_number = config_instance.get_config_value('phone number')
-        message = f"SEIZURE ALERT: {config_instance.get_config_value('help_message')}"
+        message = f"SEIZURE ALERT: {config_instance.get_config_value('help message')}"
         Textbelt.send_text_message(phone_number, message)
 
     vars = {
@@ -56,7 +56,7 @@ def config():
     if request.method == 'POST':
         new_settings = request.form.to_dict()
         print("New settings submitted:", new_settings)
-        message = "Settings updated"
+        message = "Config updated"
         config_instance.set_config(new_settings)
 
     # Render the form template with the settings and message (if any)

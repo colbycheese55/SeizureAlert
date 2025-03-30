@@ -11,7 +11,7 @@ def handle_seizure_signal():
         browser.open_browser()
         seizure.clear()
 
-if config_instance.get_config_value('enable_screen_capture'):
+if config_instance.get_config_value('enable screen capture'):
     screen_capture_thread = threading.Thread(target=screenCapture.run)
     screen_capture_thread.start()
     print("Screen capture thread started.")
