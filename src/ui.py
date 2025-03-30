@@ -1,6 +1,8 @@
 from flask import Flask, render_template
 import os
 import threading
+import Textbelt
+from config import get_config_value
 
 templates_path = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app = Flask(__name__, template_folder=templates_path)
@@ -22,8 +24,13 @@ def home():
 @app.route('/help')
 def help_needed():
     print('help_needed')
+
+    phone_number = get_config_value('phone number')
+    message = f"SEIZURE ALERT: {get_config_value('help_message')}"
+    Textbelt.send_text_message(phone_number, message)
+
     vars = {
-        'contact': 'mom'
+        'contact': get_config_value('contact'),
     }
 
     return render_template('help.html', **vars)
