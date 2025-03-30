@@ -140,9 +140,9 @@ import time
 import ui
 
 # Seizure detection settings
-SEIZURE_THRESHOLD = 9  # Movement level required to trigger an alert (% of screen)
+SEIZURE_THRESHOLD = 6  # Movement level required to trigger an alert (% of screen)
 ACCELERATION_THRESHOLD = 2  # Required acceleration to detect sudden movements
-DURATION_THRESHOLD = 0.5  # Required duration in seconds
+DURATION_THRESHOLD = 0  # Required duration in seconds
 HISTORY_LENGTH = 30  # Frames to track (~3 seconds if running at 10 FPS)
 MOVEMENT_HISTORY = []
 ACCELERATION_HISTORY = []
