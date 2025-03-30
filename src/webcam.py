@@ -137,6 +137,7 @@ from PyQt5.QtGui import QImage, QPixmap
 import mediapipe as mp
 import sys
 import time
+import ui
 
 # Seizure detection settings
 SEIZURE_THRESHOLD = 9  # Movement level required to trigger an alert (% of screen)
@@ -239,13 +240,14 @@ class Worker(QThread):
                     if not ALERT_TRIGGERED:
                         ALERT_TRIGGERED = True
                         print("🚨 Seizure detected! 🚨")
-                        self.alert_signal.emit(True)  # Send alert signal
+                        ui.alert_text = 'Seizure stimulus detected! Do you need help?'
+                        ui.seizure.set()
+
         else:
             # Introduce a grace period before resetting the timer
             if self.start_time is not None and time.time() - self.start_time > 3:  # 3-second grace period
                 self.start_time = None
                 ALERT_TRIGGERED = False
-                self.alert_signal.emit(False)  # Reset alert
 
     def run(self):
         while True:
