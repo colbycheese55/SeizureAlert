@@ -1,8 +1,10 @@
-from flask import Flask, render_template
+import json
+
+from flask import Flask, request, render_template
 import os
 import threading
 import Textbelt
-from config import get_config_value
+from config import config_instance
 
 templates_path = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app = Flask(__name__, template_folder=templates_path)
@@ -25,16 +27,41 @@ def home():
 def help_needed():
     print('help_needed')
 
-    if get_config_value('enable_sms'):
-        phone_number = get_config_value('phone number')
-        message = f"SEIZURE ALERT: {get_config_value('help_message')}"
+    if config_instance.get_config_value('enable sms'):
+        phone_number = config_instance.get_config_value('phone number')
+        message = f"SEIZURE ALERT: {config_instance.get_config_value('help message')}"
         Textbelt.send_text_message(phone_number, message)
 
     vars = {
-        'contact': get_config_value('contact'),
+        'contact': config_instance.get_config_value('contact'),
     }
 
     return render_template('help.html', **vars)
+
+
+# @app.route('/config')
+# def config():
+#     print('config')
+#
+#     vars = {
+#         'contact': get_config_value('contact'),
+#     }
+#
+#     return render_template('config.html', **vars)
+
+
+@app.route('/config', methods=['GET', 'POST'])
+def config():
+    message = None
+    if request.method == 'POST':
+        new_settings = request.form.to_dict()
+        print("New settings submitted:", new_settings)
+        message = "Config updated"
+        config_instance.set_config(new_settings)
+
+    # Render the form template with the settings and message (if any)
+    print(f"config is {config_instance.get_config()}")
+    return render_template('config.html', message=message, settings=config_instance.get_config())
 
 
 @app.route('/alert/no') #TODO

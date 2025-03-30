@@ -1,0 +1,10 @@
+{
+    "phone number": "",
+    "contact": "mom",
+    "help message": "I am having a seizure, please help me!",
+
+    "enable screen capture": true,
+    "enable webcam capture": true,
+    "enable ekg": true,
+    "enable sms": false
+}

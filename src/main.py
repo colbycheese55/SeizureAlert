@@ -1,31 +1,30 @@
-import browser
 import webcam
 import data_processing
 import screenCapture
 from ui import app, seizure
 import threading
-from config import read_in_config, get_config_value
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QImage, QPixmap
 import sys
 from webcam import SeizureAlertApp
+import screenCapture
+from config import config_instance
+import chrome
 
 
 def handle_seizure_signal():
     while True:
         seizure.wait()
-        browser.open_browser()
+        chrome.open_locked_chrome()
         seizure.clear()
 
-read_in_config()
-
-if get_config_value('enable_screen_capture'):
+if config_instance.get_config_value('enable screen capture'):
     screen_capture_thread = threading.Thread(target=screenCapture.run)
     screen_capture_thread.start()
     print("Screen capture thread started.")
 
-if get_config_value('enable_webcam_capture'):
+if config_instance.get_config_value('enable webcam capture'):
     print("Webcam capture started")
     
     # Ensure QApplication is created in the main thread
