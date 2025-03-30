@@ -1,14 +1,14 @@
-import browser
 import screenCapture
 from ui import app, seizure
 import threading
 from config import config_instance
+import chrome
 
 
 def handle_seizure_signal():
     while True:
         seizure.wait()
-        browser.open_browser()
+        chrome.open_locked_chrome()
         seizure.clear()
 
 if config_instance.get_config_value('enable screen capture'):
