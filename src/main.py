@@ -2,7 +2,7 @@ import browser
 import screenCapture
 from ui import app, seizure
 import threading
-from config import read_in_config, get_config_value
+from config import config_instance
 
 
 def handle_seizure_signal():
@@ -11,9 +11,7 @@ def handle_seizure_signal():
         browser.open_browser()
         seizure.clear()
 
-read_in_config()
-
-if get_config_value('enable_screen_capture'):
+if config_instance.get_config_value('enable_screen_capture'):
     screen_capture_thread = threading.Thread(target=screenCapture.run)
     screen_capture_thread.start()
     print("Screen capture thread started.")
