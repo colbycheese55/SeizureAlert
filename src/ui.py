@@ -69,3 +69,4 @@ def config():
 def alert_no():
     # seizure_end.set()
     communicator.close_signal.emit()
+    return "Seizure Alert Ended"
