@@ -15,15 +15,20 @@ class Config:
             default_config_path = self.get_default_config_path()
             with open(default_config_path, "r") as file:
                 self.settings = json.load(file)
-            config_path = self.get_config_path()
-            print(f"config path: {config_path}")
-            with open(config_path, "w") as file:
-                json.dump(self.settings, file, indent=4)
-            print("Configuration loaded successfully.")
         except FileNotFoundError:
             print("Default configuration file not found. Please ensure 'default_config.json' exists.")
+            exit(1)
         except json.JSONDecodeError:
             print("Error decoding JSON from the configuration file.")
+            exit(1)
+
+        config_path = self.get_config_path()
+        print(f"config path: {config_path}")
+        if not os.path.exists(config_path):
+            print("Config file does not exist. Creating new one.")
+            with open(config_path, "w") as file:
+                json.dump(self.settings, file, indent=4)
+        print("Configuration loaded successfully.")
 
     def get_config_value(self, key: str):
         """
@@ -39,11 +44,6 @@ class Config:
     def set_config(self, config: dict):
         new_settings = dict()
         for key, val in self.settings.items():
-            # if val.lower() == "true":
-            #     val = True
-            # elif val.lower() == "false":
-            #     val = False
-            # self.settings[key] = val
             if isinstance(val, bool):
                 new_settings[key] = key in config
             else:
