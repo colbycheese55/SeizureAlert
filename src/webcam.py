@@ -1,134 +1,3 @@
-# import cv2
-# import mediapipe as mp
-# import numpy as np
-# import time
-# import threading
-# import collections
-# from scipy.ndimage import gaussian_filter1d
-# import ui
-# import os
-
-# # Initialize deques
-# landmark_deque = collections.deque(maxlen=100)  # Increase the size of the rolling window
-# seizure_alerts_deque = collections.deque(maxlen=50)  # Tracks latest 20 seizure alerts
-
-# def start_webcam():
-#     mp_hands = mp.solutions.hands
-#     mp_upperbody = mp.solutions.pose
-#     mp_face = mp.solutions.face_mesh
-
-#     hands = mp_hands.Hands()
-#     upperbody = mp_upperbody.Pose()
-#     face_mesh = mp_face.FaceMesh()
-#     mp_draw = mp.solutions.drawing_utils
-
-#     cap = cv2.VideoCapture(0)  # 0 for default webcam
-
-#     while cap.isOpened():
-#         ret, frame = cap.read()
-#         if not ret:
-#             break
-
-#         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#         hand_results = hands.process(rgb_frame)
-#         upperbody_results = upperbody.process(rgb_frame)
-#         face_results = face_mesh.process(rgb_frame)
-
-#         current_time = time.time()
-
-#         # Store Hand Landmarks
-#         if hand_results.multi_hand_landmarks:
-#             for hand in hand_results.multi_hand_landmarks:
-#                 for idx, lm in enumerate(hand.landmark):
-#                     landmark_deque.append({"timestamp": current_time, "type": "hand", "index": idx, "x": lm.x, "y": lm.y, "z": lm.z})
-#                 mp_draw.draw_landmarks(frame, hand, mp_hands.HAND_CONNECTIONS)
-
-#         # Store Face Landmarks
-#         if face_results.multi_face_landmarks:
-#             for face in face_results.multi_face_landmarks:
-#                 for idx, lm in enumerate(face.landmark):
-#                     landmark_deque.append({"timestamp": current_time, "type": "face", "index": idx, "x": lm.x, "y": lm.y, "z": lm.z})
-#                 mp_draw.draw_landmarks(frame, face, mp_face.FACEMESH_TESSELATION)
-
-#         # Store Pose Landmarks
-#         if upperbody_results.pose_landmarks:
-#             for idx, lm in enumerate(upperbody_results.pose_landmarks.landmark):
-#                 landmark_deque.append({"timestamp": current_time, "type": "pose", "index": idx, "x": lm.x, "y": lm.y, "z": lm.z})
-#             mp_draw.draw_landmarks(frame, upperbody_results.pose_landmarks, mp_upperbody.POSE_CONNECTIONS)
-
-#         # Display the frame
-#         cv2.imshow("MediaPipe Hand, Face, and Upperbody", frame)
-
-        
-
-#         # Press 'q' to exit
-#         if cv2.waitKey(1) & 0xFF == ord('q'):
-#             break
-
-#     cap.release()
-#     cv2.destroyAllWindows()
-
-# def process_webcam():
-#     movement_data = []
-
-#     while True:
-#         try:
-#             if not landmark_deque:
-#                 time.sleep(1)
-#                 continue
-#             new_data = list(landmark_deque)
-#             avg_deque = collections.deque(maxlen=150)
-#             for entry in new_data:
-#                 timestamp, landmark_type, index, x, y, z = entry["timestamp"], entry["type"], entry["index"], entry["x"], entry["y"], entry["z"]
-
-#                 prev_entries = [d for d in movement_data if d[1] == landmark_type and d[2] == index]
-                
-#                 if prev_entries:
-#                     prev_data = prev_entries[-1]
-#                     dist = np.sqrt((x - prev_data[3])**2 + (y - prev_data[4])**2 + (z - prev_data[5])**2)
-#                 else:
-#                     dist = 0  
-#                 avg_deque.append(dist)
-#                 print(np.mean(avg_deque))
-                
-#                 movement_data.append((timestamp, landmark_type, index, x, y, z, dist))
-
-
-#             if len(movement_data) > 10:
-#                 rolling_distances = np.array([d[6] for d in movement_data if len(d) >= 7])
-
-#                 if rolling_distances.size > 10:
-#                     smoothed_variance = gaussian_filter1d(rolling_distances, sigma=2)
-                    
-#                     # Increase threshold by choosing a higher quantile for variance, making it harder to trigger alerts
-#                     threshold = np.quantile(smoothed_variance, 0.2)  # Higher quantile for stricter movement requirement
-                    
-#                     seizure_alerts = smoothed_variance > threshold  # Boolean array for significant movement
-
-#                     seizure_alerts_deque.append(any(seizure_alerts))  # Store a single True/False for each frame
-
-#                     # Check if there are 10 or more True values in the latest 20 seizure alerts
-#                     if len(seizure_alerts_deque) == 100 and sum(seizure_alerts_deque) >= 50:
-#                         print("🚨 Seizure detected! Do you need help?")
-#                         ui.alert_text = 'Seizure detected! Do you need help?'
-#                         ui.seizure.set()
-
-#         except Exception as e:
-#             print("Error in processing:", e)
-
-#         time.sleep(0.2)  # Process more frequently
-
-# if __name__ == "__main__":
-#     webcam_thread = threading.Thread(target=start_webcam, daemon=True)
-#     process_thread = threading.Thread(target=process_webcam, daemon=True)
-
-#     webcam_thread.start()
-#     process_thread.start()
-
-#     while True:
-#         time.sleep(1)  # Main loop to keep the threads running
-
-
 import cv2
 import numpy as np
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
@@ -140,10 +9,10 @@ import time
 import ui
 
 # Seizure detection settings
-SEIZURE_THRESHOLD = 6  # Movement level required to trigger an alert (% of screen)
-ACCELERATION_THRESHOLD = 2  # Required acceleration to detect sudden movements
-DURATION_THRESHOLD = 0  # Required duration in seconds
-HISTORY_LENGTH = 30  # Frames to track (~3 seconds if running at 10 FPS)
+SEIZURE_THRESHOLD = 2  # Movement level required to trigger an alert (% of screen)
+ACCELERATION_THRESHOLD = 1  # Required acceleration to detect sudden movements
+DURATION_THRESHOLD = 1  # Required duration in seconds
+HISTORY_LENGTH = 15 # Frames to track (~3 seconds if running at 10 FPS)
 MOVEMENT_HISTORY = []
 ACCELERATION_HISTORY = []
 ALERT_TRIGGERED = False
@@ -172,6 +41,8 @@ class Worker(QThread):
         ret, frame = self.cap.read()
         if not ret:
             return None, 0
+        
+        frame = cv2.resize(frame, (1000, 750))
 
         # Convert to RGB for MediaPipe processing
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -274,7 +145,7 @@ class SeizureAlertApp(QWidget):
         super().__init__()
 
         self.setWindowTitle("Seizure Alert System")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(400, 400, 800, 600)
 
         # Layout for the window
         self.layout = QVBoxLayout()
