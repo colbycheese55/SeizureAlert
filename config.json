@@ -5,5 +5,6 @@
 
     "enable_screen_capture": true,
     "enable_webcam_capture": true,
-    "enable_ekg": true
+    "enable_ekg": true,
+    "enable_sms": false
 }

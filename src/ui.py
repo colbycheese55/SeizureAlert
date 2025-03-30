@@ -25,9 +25,10 @@ def home():
 def help_needed():
     print('help_needed')
 
-    phone_number = get_config_value('phone number')
-    message = f"SEIZURE ALERT: {get_config_value('help_message')}"
-    Textbelt.send_text_message(phone_number, message)
+    if get_config_value('enable_sms'):
+        phone_number = get_config_value('phone number')
+        message = f"SEIZURE ALERT: {get_config_value('help_message')}"
+        Textbelt.send_text_message(phone_number, message)
 
     vars = {
         'contact': get_config_value('contact'),
