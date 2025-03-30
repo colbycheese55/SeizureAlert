@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from collections import deque
 import ui
+from browser import communicator
 
 
 DOWNSCALE_WIDTH = 160
@@ -62,4 +63,5 @@ def run():
         if rolling_var > SEIZURE_VAR_THRESHOLD:
             print("seizure")
             ui.alert_text = 'Seizure stimulus detected! Do you need help?'
-            ui.seizure.set()
+            # ui.seizure.set()
+            communicator.open_signal.emit()

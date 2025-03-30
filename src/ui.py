@@ -1,15 +1,16 @@
-import json
+import os
 
 from flask import Flask, request, render_template
-import os
-import threading
+
 import Textbelt
 from config import config_instance
+from browser import communicator
 
 templates_path = os.path.join(os.path.dirname(__file__), '..', 'templates')
 app = Flask(__name__, template_folder=templates_path)
 
-seizure = threading.Event()
+# seizure = threading.Event()
+# seizure_end = threading.Event()
 alert_text = None
 
 
@@ -64,6 +65,7 @@ def config():
     return render_template('config.html', message=message, settings=config_instance.get_config())
 
 
-@app.route('/alert/no') #TODO
+@app.route('/alert/no')
 def alert_no():
-    pass
+    # seizure_end.set()
+    communicator.close_signal.emit()
