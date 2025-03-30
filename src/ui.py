@@ -57,14 +57,11 @@ def config():
         new_settings = request.form.to_dict()
         print("New settings submitted:", new_settings)
         message = "Settings updated"
-        settings = new_settings
-    else:
-        config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
-        with open(config_path) as f:
-            settings = json.load(f)
+        config_instance.set_config(new_settings)
 
     # Render the form template with the settings and message (if any)
-    return render_template('config.html', message=message, settings=settings)
+    print(f"config is {config_instance.get_config()}")
+    return render_template('config.html', message=message, settings=config_instance.get_config())
 
 
 @app.route('/alert/no') #TODO
