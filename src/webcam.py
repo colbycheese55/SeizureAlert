@@ -136,12 +136,15 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QImage, QPixmap
 import mediapipe as mp
 import sys
-import ui
+import time
 
 # Seizure detection settings
-SEIZURE_THRESHOLD = 12  # Movement level required to trigger an alert (% of screen) original 2
+SEIZURE_THRESHOLD = 9  # Movement level required to trigger an alert (% of screen)
+ACCELERATION_THRESHOLD = 2  # Required acceleration to detect sudden movements
+DURATION_THRESHOLD = 0.5  # Required duration in seconds
 HISTORY_LENGTH = 30  # Frames to track (~3 seconds if running at 10 FPS)
 MOVEMENT_HISTORY = []
+ACCELERATION_HISTORY = []
 ALERT_TRIGGERED = False
 
 # MediaPipe initialization
@@ -161,6 +164,7 @@ class Worker(QThread):
         self.hands = mp_hands.Hands()
         self.pose = mp_pose.Pose()
         self.face_mesh = mp_face.FaceMesh()
+        self.start_time = None  # Timer for seizure detection
 
     def process_frame(self):
         """Captures frame, detects movement, and calculates movement level with MediaPipe overlays."""
@@ -205,22 +209,44 @@ class Worker(QThread):
         return frame, movement_level
 
     def detect_seizure(self, movement):
-        """Detects consistent small movements over time."""
+        """Detects consistent small movements over time with acceleration check."""
         global ALERT_TRIGGERED
 
-        # Add movement to history
         MOVEMENT_HISTORY.append(movement)
         if len(MOVEMENT_HISTORY) > HISTORY_LENGTH:
             MOVEMENT_HISTORY.pop(0)
 
-        # Check if movement stays above threshold for 3 seconds
-        if len(MOVEMENT_HISTORY) == HISTORY_LENGTH and all(m >= SEIZURE_THRESHOLD for m in MOVEMENT_HISTORY):
-            if not ALERT_TRIGGERED:
-                ALERT_TRIGGERED = True
-                ui.alert_text = 'Seizure detected! Do you need help?'
-                ui.seizure.set()
-                # You can trigger your seizure alert system here (e.g., send SMS, email, etc.)
-    
+        # Calculate acceleration
+        if len(MOVEMENT_HISTORY) > 1:
+            acceleration = abs(MOVEMENT_HISTORY[-1] - MOVEMENT_HISTORY[-2])
+            ACCELERATION_HISTORY.append(acceleration)
+            if len(ACCELERATION_HISTORY) > HISTORY_LENGTH:
+                ACCELERATION_HISTORY.pop(0)
+        else:
+            acceleration = 0
+
+        # Start timing if movement is consistently above threshold
+        if movement >= SEIZURE_THRESHOLD:
+            if self.start_time is None:
+                self.start_time = time.time()  # Start timer
+
+            # Keep track of how long movement is above the threshold
+            elapsed_time = time.time() - self.start_time
+
+            if elapsed_time >= DURATION_THRESHOLD:
+                THRESHOLD_RATIO = 0.75
+                if sum(a >= ACCELERATION_THRESHOLD for a in ACCELERATION_HISTORY[-HISTORY_LENGTH:]) >= THRESHOLD_RATIO * HISTORY_LENGTH:
+                    if not ALERT_TRIGGERED:
+                        ALERT_TRIGGERED = True
+                        print("🚨 Seizure detected! 🚨")
+                        self.alert_signal.emit(True)  # Send alert signal
+        else:
+            # Introduce a grace period before resetting the timer
+            if self.start_time is not None and time.time() - self.start_time > 3:  # 3-second grace period
+                self.start_time = None
+                ALERT_TRIGGERED = False
+                self.alert_signal.emit(False)  # Reset alert
+
     def run(self):
         while True:
             frame, movement = self.process_frame()
@@ -259,11 +285,12 @@ class SeizureAlertApp(QWidget):
         self.movement_label = QLabel("Movement Level: 0%", self)
         self.layout.addWidget(self.movement_label)
 
-        # # Seizure alert label (hidden initially)
-        # self.alert_label = QLabel("🚨 SEIZURE ALERT! 🚨", self)
-        # self.alert_label.setStyleSheet("color: red; font-size: 20px; font-weight: bold;")
-        # self.alert_label.setAlignment(Qt.AlignCenter)
-        # self.layout.addWidget(self.alert_label)
+        # Seizure alert label
+        self.alert_label = QLabel("🚨 SEIZURE ALERT! 🚨", self)
+        self.alert_label.setStyleSheet("color: red; font-size: 20px; font-weight: bold;")
+        self.alert_label.setAlignment(Qt.AlignCenter)
+        self.alert_label.hide()  # Hide initially
+        self.layout.addWidget(self.alert_label)
 
         # Initialize worker and connect signals
         self.worker = Worker()
@@ -282,13 +309,13 @@ class SeizureAlertApp(QWidget):
         self.video_label.setPixmap(pixmap)
 
     def update_movement_label(self, movement):
-        """Updates the movement label"""
+        """Updates the movement label and shows alert if needed"""
         self.movement_label.setText(f"Movement Level: {movement:.2f}%")
-        if movement >= SEIZURE_THRESHOLD:
-            ui.alert_text = 'Seizure detected! Do you need help?'
-            ui.seizure.set()
-            print("Seizure Warning!")
 
+        if ALERT_TRIGGERED:
+            self.alert_label.show()
+        else:
+            self.alert_label.hide()
 
     def closeEvent(self, event):
         """Handle window close event"""
