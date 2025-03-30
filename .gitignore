@@ -176,3 +176,5 @@ csv
 
 # PyPI configuration file
 .pypirc
+
+config.json
