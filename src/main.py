@@ -8,6 +8,7 @@ import chrome
 def handle_seizure_signal():
     while True:
         seizure.wait()
+        print("Seizure signal received.")
         chrome.open_locked_chrome()
         seizure.clear()
 

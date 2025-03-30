@@ -3,13 +3,14 @@ import numpy as np
 import cv2
 from collections import deque
 import ui
+import time
 
 
 DOWNSCALE_WIDTH = 160
 DOWNSCALE_HEIGHT = 90
 
-ROLLING_AVG_WINDOW = 50
-SEIZURE_VAR_THRESHOLD = 3000
+ROLLING_AVG_WINDOW = 80
+SEIZURE_VAR_THRESHOLD = 4000
 
 def compute_fft_energy(frame: cv2.typing.MatLike) -> float:
     """
@@ -52,6 +53,8 @@ def capture_screen_frame() -> cv2.typing.MatLike:
 
 def run():
     rolling_queue = deque(maxlen=ROLLING_AVG_WINDOW)  # Initialize a deque for rolling average
+    time.sleep(10)
+    print("Screen capture is ready.")
 
     while True:
         frame = capture_screen_frame()
@@ -59,7 +62,10 @@ def run():
         rolling_queue.append(frame_energy)  # Append current energy to the deque
         rolling_var = np.var(rolling_queue) / 1e10  # Calculate rolling variance and scale it
 
+        # print(f"Rolling variance: {rolling_var}")
         if rolling_var > SEIZURE_VAR_THRESHOLD:
             print("seizure")
             ui.alert_text = 'Seizure stimulus detected! Do you need help?'
             ui.seizure.set()
+
+            rolling_queue.clear()
